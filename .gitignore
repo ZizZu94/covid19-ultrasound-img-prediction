@@ -130,3 +130,6 @@ dmypy.json
 
 # data folder
 data/*
+
+# data pre-processing file
+data_pre_processing_and_split.ipynb
