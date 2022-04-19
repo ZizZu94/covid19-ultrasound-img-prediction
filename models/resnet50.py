@@ -5,7 +5,6 @@ from torchvision import models
 
 class CustomResNet50(nn.Module):
     def __init__(self, img_w, img_h, class_num, dropout = 0.4):
-        
         super(CustomResNet50, self).__init__()
 
         self.img_w = img_w
