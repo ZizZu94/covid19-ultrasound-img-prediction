@@ -101,6 +101,7 @@ def test(args, model, test_loader, nclasses, criterion, epoch, state_dict, weigh
     correct = 0
     test_losses, preds, labels = [], [], []
     confusion_matrix = torch.zeros(nclasses, nclasses)
+    
     with torch.no_grad():
         for data, target, _ in test_loader:
             data, target = data.cuda(), target.long().cuda()
@@ -207,7 +208,6 @@ def experiments(args):
 
     # model
     model = CustomResNet50(args.img_size, args.img_size, num_calss, args.dropout)
-
     print('Number of params in the model: {}'.format(
         *[sum([p.data.nelement() for p in net.parameters()]) for net in [model]]))
     model = model.cuda()
@@ -215,18 +215,18 @@ def experiments(args):
     # optimizer
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
     exp_lr_scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[70], gamma=0.1) # 10, 50
+    
     # loss function
     criterion = nn.CrossEntropyLoss()
 
     state_dict = {'best_f1': 0., 'precision': 0., 'recall': 0., 'accuracy': 0.}
 
     for epoch in range(args.epochs):
-        # train
         model = train(args, model, train_dloader, len(list(set(train_labels))), optimizer, criterion, epoch)
-        # test
         test(args, model, test_dloader, len(list(set(train_labels))), criterion, epoch, state_dict, args.weights_dir)
         exp_lr_scheduler.step()
 
 if __name__ == '__main__':
     args = parse_arguments()
+    print(args)
     experiments(args)
