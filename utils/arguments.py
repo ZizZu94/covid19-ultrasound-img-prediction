@@ -1,6 +1,15 @@
 import argparse
 from datetime import datetime
 
+def restricted_float(x):
+    try:
+        x = float(x)
+    except ValueError:
+        raise argparse.ArgumentTypeError("%r not a floating-point literal" % (x,))
+
+    if x < 0.0 or x > 1.0:
+        raise argparse.ArgumentTypeError("%r not in range [0.0, 1.0]"%(x,))
+    return x
 
 def parse_arguments():
 
@@ -19,7 +28,7 @@ def parse_arguments():
     parser.add_argument(
         '--batch_size',
         '-b',
-        default=64,
+        default=30, # 64
         type=int,
         help='Batch size.')
     parser.add_argument(
@@ -30,9 +39,14 @@ def parse_arguments():
     parser.add_argument(
         '--num_workers',
         '-w',
-        default=5,
+        default=1,
         type=int,
         help='Number of workers in data loader')
+    parser.add_argument(
+        '--dropout',
+        default=0.4,
+        type=restricted_float,
+        help='Dropout rate of the dropout layer')
     parser.add_argument(
         '--dataset_root',
         default='./data',
@@ -50,7 +64,7 @@ def parse_arguments():
         help='The split strategy.')
     parser.add_argument(
         '--log_interval',
-        default=50,
+        default=100,
         type=int,
         help='Interval for printing')
     parser.add_argument(

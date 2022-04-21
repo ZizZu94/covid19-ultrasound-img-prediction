@@ -9,7 +9,7 @@ class CustomResNet50(nn.Module):
 
         self.img_w = img_w
         self.img_h = img_h
-        self.class_n = class_num
+        self.class_num = class_num
         self.dropout = dropout
 
         backbone = models.resnet50(pretrained=True)
@@ -21,7 +21,7 @@ class CustomResNet50(nn.Module):
 
         # classifier
         self.out = nn.Sequential(
-            nn.Linear(self.fc_inputs, 256),
+            nn.Linear(self.fc_inputs, 256, bias=True),
             nn.ReLU(),
             nn.Dropout(self.dropout),
             nn.Linear(256, self.class_num),
