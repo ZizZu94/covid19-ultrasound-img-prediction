@@ -92,7 +92,7 @@ def train(args, model, train_loader, nclasses, optimizer, criterion, epoch):
     int(confusion_matrix.diag()[3].item()), int(confusion_matrix.sum(1)[3].item()), per_class_accuracy[3].item() * 100.,
     precision, recall, fscore) + Style.RESET_ALL)
 
-    return model
+    return model, train_loss
 
     
 
@@ -150,6 +150,8 @@ def test(args, model, test_loader, nclasses, criterion, epoch, state_dict, weigh
     save_weights(model, os.path.join(weights_path, 'model.pth'))
     save_best_model(model, weights_path, metrics, state_dict)
 
+    return test_loss
+
 def save_weights(model, path):
     torch.save(model.state_dict(), path)
 
@@ -177,13 +179,17 @@ def save_best_model(model, path, metrics, state_dict):
     print(Fore.BLUE + best_str + Style.RESET_ALL)
 
 def experiments(args):
+    SRC_DIR = args.src_root
+    
     # load data
-    train_data = pd.read_csv(os.path.join(args.dataset_root, 'train_frames.csv'))
-    test_data = pd.read_csv(os.path.join(args.dataset_root, 'test_frames.csv'))
+    #train_data = pd.read_csv(os.path.join(args.dataset_root, 'train_frames.csv'))
+    #test_data = pd.read_csv(os.path.join(args.dataset_root, 'test_frames.csv'))
+    train_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'train_frames.csv'))
+    test_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'test_frames.csv'))
     
     # subset the dataset
-    train_ds = CustomDataSet(args, train_data, transforms=get_transforms(args, 'train'))
-    test_ds = CustomDataSet(args, test_data, transforms=get_transforms(args, 'test'))
+    train_ds = CustomDataSet(os.path.join(SRC_DIR, 'data'), train_data, transforms=get_transforms(args, 'train'))
+    test_ds = CustomDataSet(os.path.join(SRC_DIR, 'data'), test_data, transforms=get_transforms(args, 'test'))
 
     train_labels = train_data['frame_score'].unique()
     num_calss = len(train_labels)
@@ -203,8 +209,11 @@ def experiments(args):
         drop_last=False)
 
     # create log directories
-    args.weights_dir = os.path.join('logs', args.run_name, 'weights')
+    #args.weights_dir = os.path.join('logs', args.run_name, 'weights')
+    args.weights_dir = os.path.join(SRC_DIR, 'logs', args.run_name, 'weights')
     os.makedirs(args.weights_dir, exist_ok=True)
+    args.loss_dir = os.path.join(SRC_DIR, 'logs', args.run_name, 'losses')
+    os.makedirs(args.loss_dir, exist_ok=True)
 
     # model
     model = CustomResNet50(args.img_size, args.img_size, num_calss, args.dropout)
@@ -220,11 +229,16 @@ def experiments(args):
     criterion = nn.CrossEntropyLoss()
 
     state_dict = {'best_f1': 0., 'precision': 0., 'recall': 0., 'accuracy': 0.}
+    losses_array = np.zeros(shape=[args.epochs, 2])
 
     for epoch in range(args.epochs):
-        model = train(args, model, train_dloader, len(list(set(train_labels))), optimizer, criterion, epoch)
-        test(args, model, test_dloader, len(list(set(train_labels))), criterion, epoch, state_dict, args.weights_dir)
+        model, train_loss = train(args, model, train_dloader, len(list(set(train_labels))), optimizer, criterion, epoch)
+        test_loss = test(args, model, test_dloader, len(list(set(train_labels))), criterion, epoch, state_dict, args.weights_dir)
+        losses_array[epoch] = [train_loss, test_loss]
         exp_lr_scheduler.step()
+    
+    np.save(os.path.join(args.loss_dir, 'losses.npy'), losses_array)
+
 
 if __name__ == '__main__':
     args = parse_arguments()

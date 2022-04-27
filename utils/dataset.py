@@ -7,8 +7,9 @@ import os
 
 class CustomDataSet(Dataset):
     
-    def __init__(self, args, data, transforms=None):
-        self.root_dir = args.dataset_root
+    def __init__(self, data_root_dir, data, transforms=None):
+        #self.root_dir = args.dataset_root
+        self.data_root_dir = data_root_dir
         self.transforms = transforms
         self.annotations_frame = data
 
@@ -26,7 +27,7 @@ class CustomDataSet(Dataset):
         frame_id = self.annotations_frame.iloc[idx, 8]
         frame_score = self.annotations_frame.iloc[idx, 9]
 
-        frame_path = os.path.join(self.root_dir, str(patient_id), str(exam_id), str(exam_location), '{}.npy'.format(frame_id))
+        frame_path = os.path.join(self.data_root_dir, str(patient_id), str(exam_id), str(exam_location), '{}.npy'.format(frame_id))
         frame = np.load(frame_path)
 
         # info
