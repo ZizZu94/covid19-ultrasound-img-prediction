@@ -1,5 +1,7 @@
-*/.venv
-*/.vscode
-*/.git
-*/data
-*/img
+.venv
+.vscode
+.git
+data
+img
+*.ipynb
+*.md

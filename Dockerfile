@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.5.0-cudnn8-runtime-ubuntu18.04
+FROM nvidia/cuda:11.6.0-runtime-ubuntu20.04
 
 RUN apt-get update && apt-get install -y python3 python3-pip sudo
 
@@ -10,6 +10,6 @@ COPY --chown=zihadul . /home/zihadul/app
 
 USER zihadul
 
-# RUN cd /home/zihadul/app/ && pip3 install -r requirements.txt
+RUN cd /home/zihadul/app/ && pip3 install --no-cache-dir -r requirements.txt
 
 WORKDIR /home/zihadul/app
