@@ -28,7 +28,7 @@ def parse_arguments():
     parser.add_argument(
         '--batch_size',
         '-b',
-        default=30, # 64
+        default=64, # 64
         type=int,
         help='Batch size.')
     parser.add_argument(
@@ -39,7 +39,7 @@ def parse_arguments():
     parser.add_argument(
         '--num_workers',
         '-w',
-        default=1,
+        default=5,
         type=int,
         help='Number of workers in data loader')
     parser.add_argument(
@@ -53,6 +53,12 @@ def parse_arguments():
         type=str,
         help='Root folder for the datasets.')
     parser.add_argument(
+        '--src_root',
+        default='/home/zihadul/src',
+        #default='/mnt/d/Uni/Masters/MID/thesis-project/covid-19-frame-pred',
+        type=str,
+        help='Root folder for the src folder.')
+    parser.add_argument(
         '--seed',
         default=None,
         type=int,
@@ -64,7 +70,7 @@ def parse_arguments():
         help='The split strategy.')
     parser.add_argument(
         '--log_interval',
-        default=100,
+        default=50,
         type=int,
         help='Interval for printing')
     parser.add_argument(
