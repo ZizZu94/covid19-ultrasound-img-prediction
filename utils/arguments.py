@@ -54,7 +54,7 @@ def parse_arguments():
         help='Root folder for the datasets.')
     parser.add_argument(
         '--src_root',
-        default='/home/zihadul/src',
+        default='/home/zihadul.azam/ultra/src',
         #default='/mnt/d/Uni/Masters/MID/thesis-project/covid-19-frame-pred',
         type=str,
         help='Root folder for the src folder.')

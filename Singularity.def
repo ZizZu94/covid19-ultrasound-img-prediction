@@ -1,0 +1,17 @@
+Bootstrap: docker
+From: nvidia/cuda:11.5.0-runtime-ubuntu20.04
+
+%post
+    apt-get update
+    apt-get install -y python3 python3-pip sudo
+
+%files
+    models/ /opt/
+    utils/ /opt/
+    main.py /opt
+    prova.py /opt
+    requirements.txt /opt
+
+%post
+    cd /opt
+    pip3 install --no-cache-dir -r requirements.txt

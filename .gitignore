@@ -140,3 +140,7 @@ data_pre_processing_and_split.ipynb
 
 # log folder
 /logs
+
+#sif and zio
+*.sif
+*.zip
