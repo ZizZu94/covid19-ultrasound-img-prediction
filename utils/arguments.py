@@ -28,14 +28,9 @@ def parse_arguments():
     parser.add_argument(
         '--batch_size',
         '-b',
-        default=64, # 64
+        default=32, # 64
         type=int,
         help='Batch size.')
-    parser.add_argument(
-        '--sensors',
-        nargs='+',
-        default=['linear', 'convex', 'unknown'],
-        help='Sensors to be used.')
     parser.add_argument(
         '--num_workers',
         '-w',
@@ -44,30 +39,14 @@ def parse_arguments():
         help='Number of workers in data loader')
     parser.add_argument(
         '--dropout',
-        default=0.4,
+        default=0.35,
         type=restricted_float,
         help='Dropout rate of the dropout layer')
     parser.add_argument(
-        '--dataset_root',
-        default='./data',
-        type=str,
-        help='Root folder for the datasets.')
-    parser.add_argument(
         '--src_root',
-        default='/home/zihadul.azam/ultra/src',
-        #default='/mnt/d/Uni/Masters/MID/thesis-project/covid-19-frame-pred',
+        default='/home/zihadul.azam/ultra/src/covid-19',
         type=str,
         help='Root folder for the src folder.')
-    parser.add_argument(
-        '--seed',
-        default=None,
-        type=int,
-        help='Random seed.')
-    parser.add_argument(
-        '--split',
-        default='patient_hash',
-        type=str,
-        help='The split strategy.')
     parser.add_argument(
         '--log_interval',
         default=50,
@@ -90,26 +69,6 @@ def parse_arguments():
         default=224,
         type=int,
         help='image size.')
-    parser.add_argument(
-        '--fixed_scale',
-        default=False,
-        action='store_true',
-        help='Use fixed scaling for the STN.')
-    parser.add_argument(
-        '--lambda_cons',
-        type=float,
-        default=1.,
-        help='weight for consistency regularization loss')
-    parser.add_argument(
-        '--lambda_stn_params',
-        type=float,
-        default=1.,
-        help='weight for the scaling params loss')
-    parser.add_argument(
-        '--multiplier',
-        default=2,
-        type=int,
-        help='multiplier for sord loss')
     args = parser.parse_args()
     args.run_name = '-'.join([args.model_name, args.comment])
 
