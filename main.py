@@ -3,6 +3,7 @@ from utils.dataset import CustomDataSet
 from utils.transforms import get_transforms
 
 from models.resnet50 import CustomResNet50
+from models.efficientnet import EfficientNet
 
 import os
 
@@ -73,12 +74,15 @@ def train(args, model, train_loader, nclasses, optimizer, criterion, epoch):
             loss.item()))
     
     train_loss = np.mean(np.asarray(train_losses))
+    
     # compute the metrics
     precision, recall, fscore, _ = precision_recall_fscore_support(
         y_true=torch.cat(labels), y_pred=torch.cat(preds), average='micro')
 
-    # print epoch logs
     per_class_accuracy = confusion_matrix.diag() / confusion_matrix.sum(1)
+    train_accuracy = 100 * correct / len(train_loader.dataset)
+
+    # print epoch logs
     print(Fore.GREEN + '\nTrain set: Accuracy: {}/{}({:.2f}%), Average Loss: {:.4f}'.format(correct,
     len(train_loader.dataset), 100 * correct / len(train_loader.dataset), train_loss) +
     Style.RESET_ALL)
@@ -92,7 +96,7 @@ def train(args, model, train_loader, nclasses, optimizer, criterion, epoch):
     int(confusion_matrix.diag()[3].item()), int(confusion_matrix.sum(1)[3].item()), per_class_accuracy[3].item() * 100.,
     precision, recall, fscore) + Style.RESET_ALL)
 
-    return model, train_loss
+    return model, train_loss, train_accuracy
 
     
 
@@ -126,7 +130,11 @@ def test(args, model, test_loader, nclasses, criterion, epoch, state_dict, weigh
 
     precision, recall, fscore, _ = precision_recall_fscore_support(
         y_true=torch.cat(labels), y_pred=torch.cat(preds), average='micro')
+    
     per_class_accuracy = confusion_matrix.diag() / confusion_matrix.sum(1)
+
+    test_accuracy = 100 * correct / len(test_loader.dataset)
+
     print(Fore.RED + '\nTest Set: Average Loss: {:.4f}, Accuracy: {}/{} \
     ({:.2f}%)'.format(test_loss, correct, len(test_loader.dataset), 100 *
     correct / len(test_loader.dataset))  + Style.RESET_ALL)
@@ -150,7 +158,7 @@ def test(args, model, test_loader, nclasses, criterion, epoch, state_dict, weigh
     save_weights(model, os.path.join(weights_path, 'model.pth'))
     save_best_model(model, weights_path, metrics, state_dict)
 
-    return test_loss
+    return test_loss, test_accuracy
 
 def save_weights(model, path):
     torch.save(model.state_dict(), path)
@@ -182,8 +190,6 @@ def experiments(args):
     SRC_DIR = args.src_root
     
     # load data
-    #train_data = pd.read_csv(os.path.join(args.dataset_root, 'train_frames.csv'))
-    #test_data = pd.read_csv(os.path.join(args.dataset_root, 'test_frames.csv'))
     train_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'train_frames.csv'))
     test_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'test_frames.csv'))
     
@@ -198,7 +204,7 @@ def experiments(args):
     train_dloader = DataLoader(
         train_ds,
         batch_size=args.batch_size,
-        shuffle=False,
+        shuffle=True,
         num_workers=args.num_workers,
         drop_last=True)
     test_dloader = DataLoader(
@@ -208,39 +214,65 @@ def experiments(args):
         num_workers=args.num_workers,
         drop_last=False)
 
+    ## show batch imgs
+    ## uncomment it if you want to display batch images
+    # show_batch(train_dloader)
+
     # create log directories
-    #args.weights_dir = os.path.join('logs', args.run_name, 'weights')
     args.weights_dir = os.path.join(SRC_DIR, 'logs', args.run_name, 'weights')
     os.makedirs(args.weights_dir, exist_ok=True)
-    args.loss_dir = os.path.join(SRC_DIR, 'logs', args.run_name, 'losses')
-    os.makedirs(args.loss_dir, exist_ok=True)
+    metrics_dir = os.path.join(SRC_DIR, 'logs', args.run_name, 'metrics')
+    os.makedirs(metrics_dir, exist_ok=True)
 
-    # model
-    model = CustomResNet50(args.img_size, args.img_size, num_calss, args.dropout)
+    ## model
+    if args.model == 'efficient_net_b4':
+        print('We are using EfficientNet_b4')
+        model = EfficientNet(args.img_size, args.img_size, num_calss, args.dropout)
+    else:
+        print('We are using Resnet50')
+        model = CustomResNet50(num_calss, args.dropout)
+
+    
     print('Number of params in the model: {}'.format(
         *[sum([p.data.nelement() for p in net.parameters()]) for net in [model]]))
+
     model = model.cuda()
 
-    # optimizer
-    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
-    exp_lr_scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[70], gamma=0.1) # 10, 50
+    ## optimizer
+    #optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.001)
     
     # loss function
     criterion = nn.CrossEntropyLoss()
 
     state_dict = {'best_f1': 0., 'precision': 0., 'recall': 0., 'accuracy': 0.}
     losses_array = np.zeros(shape=[args.epochs, 2])
+    accuracy_array = np.zeros(shape=[args.epochs, 2])
+    best_test_accuracy = 0
+    best_test_epoch = -1
 
     for epoch in range(args.epochs):
-        model, train_loss = train(args, model, train_dloader, len(list(set(train_labels))), optimizer, criterion, epoch)
-        test_loss = test(args, model, test_dloader, len(list(set(train_labels))), criterion, epoch, state_dict, args.weights_dir)
+        model, train_loss, train_accuracy = train(args, model, train_dloader, len(list(set(train_labels))), optimizer, criterion, epoch)
+        test_loss, test_accuracy = test(args, model, test_dloader, len(list(set(train_labels))), criterion, epoch, state_dict, args.weights_dir)
         losses_array[epoch] = [train_loss, test_loss]
-        exp_lr_scheduler.step()
+        accuracy_array[epoch] = [train_accuracy, test_accuracy]
+
+        if test_accuracy > best_test_accuracy:
+            best_test_accuracy = test_accuracy
+            best_test_epoch = epoch
+
+        print(Fore.YELLOW + 'Best test accuracy so far: {:.2f}% [{} epoch]'.format(best_test_accuracy, best_test_epoch) + Style.RESET_ALL)
     
-    np.save(os.path.join(args.loss_dir, 'losses.npy'), losses_array)
+    np.save(os.path.join(metrics_dir, 'losses.npy'), losses_array)
+    np.save(os.path.join(metrics_dir, 'accuracy.npy'), accuracy_array)
 
 
 if __name__ == '__main__':
     args = parse_arguments()
     print(args)
-    experiments(args)
+    print("Is CUDA available?: ", torch.cuda.is_available())
+
+    if torch.cuda.is_available():
+        experiments(args)
+    else:
+        print('Sorry CUDA is not available. Exiting...')

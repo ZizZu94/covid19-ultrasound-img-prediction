@@ -15,6 +15,12 @@ def parse_arguments():
 
     parser = argparse.ArgumentParser(description='Configurations.')
     parser.add_argument(
+        '--model',
+        default='resnet_50',
+        #default='efficient_net_b4',
+        type=str,
+        help='The model name: resnet_50, efficient_net_b4')
+    parser.add_argument(
         '--lr',
         default=1e-4,
         type=float,
