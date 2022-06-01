@@ -1,1 +1,1 @@
-# covid19-ultrasound-img-prediction
+# Covid19 Ultrasound image score prediction using ResNet50 and EfficientNet
