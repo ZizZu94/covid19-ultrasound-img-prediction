@@ -1,14 +1,12 @@
-import torch
-from torch.utils.data import Dataset
-
+import os
 import numpy as np
 
-import os
+import torch
+from torch.utils.data import Dataset
 
 class CustomDataSet(Dataset):
     
     def __init__(self, data_root_dir, data, transforms=None):
-        #self.root_dir = args.dataset_root
         self.data_root_dir = data_root_dir
         self.transforms = transforms
         self.annotations_frame = data

@@ -1,15 +1,16 @@
+import os
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+
 from utils.arguments import parse_arguments
 from utils.dataset import CustomDataSet
 from utils.transforms import get_transforms
 
-from models.resnet50 import CustomResNet50
-from models.efficientnet import EfficientNet
-
-import os
-
-import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
+from models.resnet import CustomResNet18
+from models.resnet import CustomResNet50
+from models.efficientnet import CustomEfficientNetB0
+from models.efficientnet import CustomEfficientNetB4
 
 import torch
 import torchvision
@@ -225,11 +226,17 @@ def experiments(args):
     os.makedirs(metrics_dir, exist_ok=True)
 
     ## model
+    if args.model == 'efficient_net_b0':
+        print('Warning: using EfficientNet B0 as backbone model')
+        model = CustomEfficientNetB0(args.img_size, args.img_size, num_calss, args.dropout)
     if args.model == 'efficient_net_b4':
-        print('We are using EfficientNet_b4')
-        model = EfficientNet(args.img_size, args.img_size, num_calss, args.dropout)
+        print('Warning: using EfficientNet B4 as backbone model')
+        model = CustomEfficientNetB4(args.img_size, args.img_size, num_calss, args.dropout)
+    if args.model == 'resnet_18':
+        print('Warning: using Resnet 18 as backbone model')
+        model = CustomResNet18(args.img_size, args.img_size, num_calss, args.dropout)
     else:
-        print('We are using Resnet50')
+        print('Warning: using Resnet 50 as backbone model')
         model = CustomResNet50(num_calss, args.dropout)
 
     

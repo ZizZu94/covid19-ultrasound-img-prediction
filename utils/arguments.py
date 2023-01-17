@@ -17,9 +17,8 @@ def parse_arguments():
     parser.add_argument(
         '--model',
         default='resnet_50',
-        #default='efficient_net_b4',
         type=str,
-        help='The model name: resnet_50, efficient_net_b4')
+        help='Available models: efficient_net_b0 | efficient_net_b4 | resnet_18 | resnet_50')
     parser.add_argument(
         '--lr',
         default=1e-4,

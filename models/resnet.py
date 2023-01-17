@@ -3,21 +3,19 @@ from torch import nn
 import torchvision
 from torchvision import models
 
-class CustomEfficientNetB0(nn.Module):
-    def __init__(self, img_w, img_h, class_num, dropout = 0.4):
-        super(CustomEfficientNetB0, self).__init__()
+class CustomResNet18(nn.Module):
+    def __init__(self, class_num, dropout = 0.4):
+        super(CustomResNet18, self).__init__()
 
-        self.img_w = img_w
-        self.img_h = img_h
         self.class_num = class_num
         self.dropout = dropout
 
-        backbone = models.efficientnet_b0(pretrained=True)
-        self.fc_inputs = backbone.classifier[1].in_features
+        backbone = models.resnet18(pretrained=True)
+        self.fc_inputs = backbone.fc.in_features
 
-        base_layers = list(backbone.children())[:-1]
+        self.feature_extractor = nn.Sequential(*list(backbone.children())[:-2]) # we take layers before the classifier and the avgpool
 
-        self.feature_extractor = nn.Sequential(*base_layers)
+        self.avgpool = backbone.avgpool
 
         # classifier
         self.out = nn.Sequential(
@@ -25,30 +23,28 @@ class CustomEfficientNetB0(nn.Module):
             nn.ReLU(),
             nn.Dropout(self.dropout),
             nn.Linear(1024, self.class_num),
-            #nn.LogSoftmax(dim=1) # For using NLLLoss()
         )
     
     def forward(self, x):
         x = self.feature_extractor(x)
+        x = self.avgpool(x)
         x = x.view(x.shape[0], -1)  # reshape the tensor
         x = self.out(x)
         return x
 
-class CustomEfficientNetB4(nn.Module):
-    def __init__(self, img_w, img_h, class_num, dropout = 0.4):
-        super(CustomEfficientNetB4, self).__init__()
+class CustomResNet50(nn.Module):
+    def __init__(self, class_num, dropout = 0.4):
+        super(CustomResNet50, self).__init__()
 
-        self.img_w = img_w
-        self.img_h = img_h
         self.class_num = class_num
         self.dropout = dropout
 
-        backbone = models.efficientnet_b4(pretrained=True)
-        self.fc_inputs = backbone.classifier[1].in_features
+        backbone = models.resnet50(pretrained=True)
+        self.fc_inputs = backbone.fc.in_features
 
-        base_layers = list(backbone.children())[:-1]
+        self.feature_extractor = nn.Sequential(*list(backbone.children())[:-2]) # we take layers before the classifier and the avgpool
 
-        self.feature_extractor = nn.Sequential(*base_layers)
+        self.avgpool = backbone.avgpool
 
         # classifier
         self.out = nn.Sequential(
@@ -56,13 +52,12 @@ class CustomEfficientNetB4(nn.Module):
             nn.ReLU(),
             nn.Dropout(self.dropout),
             nn.Linear(1024, self.class_num),
-            #nn.LogSoftmax(dim=1) # For using NLLLoss()
         )
     
     def forward(self, x):
         x = self.feature_extractor(x)
+        x = self.avgpool(x)
         x = x.view(x.shape[0], -1)  # reshape the tensor
         x = self.out(x)
         return x
-
 
