@@ -14,7 +14,6 @@ class CustomResNet18(nn.Module):
         self.fc_inputs = backbone.fc.in_features
 
         self.feature_extractor = nn.Sequential(*list(backbone.children())[:-2]) # we take layers before the classifier and the avgpool
-
         self.avgpool = backbone.avgpool
 
         # classifier
@@ -43,7 +42,6 @@ class CustomResNet50(nn.Module):
         self.fc_inputs = backbone.fc.in_features
 
         self.feature_extractor = nn.Sequential(*list(backbone.children())[:-2]) # we take layers before the classifier and the avgpool
-
         self.avgpool = backbone.avgpool
 
         # classifier

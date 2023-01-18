@@ -26,7 +26,7 @@ import colorama
 from colorama import Fore, Back, Style
 colorama.init()
 
-
+# plot batch images
 def show_batch(dl):
     for images, _, info in dl:
         fig, ax = plt.subplots(figsize=(32, 32))
@@ -35,6 +35,7 @@ def show_batch(dl):
         plt.savefig("./img/mygraph.png")
         break
 
+# madel train function
 def train(args, model, train_loader, nclasses, optimizer, criterion, epoch):
     model.train()
     correct = 0
@@ -99,8 +100,7 @@ def train(args, model, train_loader, nclasses, optimizer, criterion, epoch):
 
     return model, train_loss, train_accuracy
 
-    
-
+# model test function
 def test(args, model, test_loader, nclasses, criterion, epoch, state_dict, weights_path):
     model.eval()
     correct = 0
@@ -161,9 +161,11 @@ def test(args, model, test_loader, nclasses, criterion, epoch, state_dict, weigh
 
     return test_loss, test_accuracy
 
+# save trained model weights
 def save_weights(model, path):
     torch.save(model.state_dict(), path)
 
+# load model weights
 def load_weights(args, model, path):
     if args.arch == 'ResNet50':
         state_dict_ = torch.load(path)
@@ -176,6 +178,7 @@ def load_weights(args, model, path):
     model.load_state_dict(modified_state_dict, strict=True)
     return model
 
+# save best model weights
 def save_best_model(model, path, metrics, state_dict):
     if metrics['test/F1'] > state_dict['best_f1']:
         state_dict['best_f1'] = max(metrics['test/F1'], state_dict['best_f1'])
@@ -187,18 +190,20 @@ def save_best_model(model, path, metrics, state_dict):
     best_str = "Best Metrics:" + '; '.join(["%s - %s" % (k, v) for k, v in state_dict.items()])
     print(Fore.BLUE + best_str + Style.RESET_ALL)
 
+# experiment functions, where we train and validate the model
 def experiments(args):
     SRC_DIR = args.src_root
-    
-    # load data
-    train_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'train_frames.csv'))
-    test_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'test_frames.csv'))
-    
-    # subset the dataset
-    train_ds = CustomDataSet(os.path.join(SRC_DIR, 'data'), train_data, transforms=get_transforms(args, 'train'))
-    test_ds = CustomDataSet(os.path.join(SRC_DIR, 'data'), test_data, transforms=get_transforms(args, 'test'))
 
-    train_labels = train_data['frame_score'].unique()
+    # load data information from csv file
+    train_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'train.csv'))
+    test_data = pd.read_csv(os.path.join(SRC_DIR, 'data', 'test.csv'))
+    
+    # create custom datasets
+    train_ds = CustomDataSet(os.path.join(SRC_DIR, 'data', 'Train'), train_data, transforms=get_transforms(args, 'train'))
+    test_ds = CustomDataSet(os.path.join(SRC_DIR, 'data', 'Test'), test_data, transforms=get_transforms(args, 'test'))
+
+    # get class informations
+    train_labels = train_data['score'].unique()
     num_calss = len(train_labels)
     
     # data loader
@@ -229,20 +234,21 @@ def experiments(args):
     if args.model == 'efficient_net_b0':
         print('Warning: using EfficientNet B0 as backbone model')
         model = CustomEfficientNetB0(args.img_size, args.img_size, num_calss, args.dropout)
-    if args.model == 'efficient_net_b4':
+    elif args.model == 'efficient_net_b4':
         print('Warning: using EfficientNet B4 as backbone model')
         model = CustomEfficientNetB4(args.img_size, args.img_size, num_calss, args.dropout)
-    if args.model == 'resnet_18':
+    elif args.model == 'resnet_18':
         print('Warning: using Resnet 18 as backbone model')
-        model = CustomResNet18(args.img_size, args.img_size, num_calss, args.dropout)
+        model = CustomResNet18(num_calss, args.dropout)
     else:
         print('Warning: using Resnet 50 as backbone model')
         model = CustomResNet50(num_calss, args.dropout)
 
     
-    print('Number of params in the model: {}'.format(
+    print('Number of params of current model: {}'.format(
         *[sum([p.data.nelement() for p in net.parameters()]) for net in [model]]))
 
+    # load model to cuda
     model = model.cuda()
 
     ## optimizer
@@ -280,6 +286,7 @@ if __name__ == '__main__':
     print("Is CUDA available?: ", torch.cuda.is_available())
 
     if torch.cuda.is_available():
+        print('Cool: CUDA is avaiable, so entering inside the experiment function.')
         experiments(args)
     else:
         print('Sorry CUDA is not available. Exiting...')

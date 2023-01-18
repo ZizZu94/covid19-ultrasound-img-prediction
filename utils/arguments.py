@@ -16,7 +16,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Configurations.')
     parser.add_argument(
         '--model',
-        default='resnet_50',
+        default='efficient_net_b0',
         type=str,
         help='Available models: efficient_net_b0 | efficient_net_b4 | resnet_18 | resnet_50')
     parser.add_argument(
@@ -49,7 +49,7 @@ def parse_arguments():
         help='Dropout rate of the dropout layer')
     parser.add_argument(
         '--src_root',
-        default='/home/zihadul.azam/ultra/src/covid-19',
+        default='./src',
         type=str,
         help='Root folder for the src folder.')
     parser.add_argument(
@@ -66,7 +66,7 @@ def parse_arguments():
     parser.add_argument(
         '--model_name',
         '-n',
-        default='covid19',
+        default='covid19-resnet-18',
         type=str,
         help='Name of the model you want to use.')
     parser.add_argument(
