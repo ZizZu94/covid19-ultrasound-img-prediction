@@ -16,7 +16,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Configurations.')
     parser.add_argument(
         '--model',
-        default='efficient_net_b0',
+        default='resnet_18',
         type=str,
         help='Available models: efficient_net_b0 | efficient_net_b4 | resnet_18 | resnet_50')
     parser.add_argument(
