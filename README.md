@@ -8,10 +8,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="doc-imgs/logo.png" alt="Logo" width="80" height="80">
-  </a>
-
+  <img src="doc-imgs/logo.png" alt="Logo" width="80" height="80">
   <h3 align="center">Covid-19 Ultrasound image score prediction using Convolutional Neural Networks</h3>
 
   <p align="center">
@@ -36,7 +33,11 @@ The aim of this project is to understand the behavior of state-of-the-art convol
 
 ### Dataset
 
-For this research study, the Italian COVID-19 Lung Ultrasound DataBase (ICLUS-DB) is used. It was introduced by Italian researchers in a scientific research [paper](https://pubmed.ncbi.nlm.nih.gov/32406829/) in 2020. It contains a total of 277 lung ultrasound (LUS) videos from 35 patients, corresponding to 58,924 frames. Among them, 45,560 frames were acquired with the convex probe and 13,364 frames with the linear probe. All frames were labelled with four-level scoring system (score-0, score-1, score-2 and score-3). This scoring system classifies LUS frames by the severity of the pathology. 
+For this research study, the Italian COVID-19 Lung Ultrasound DataBase (ICLUS-DB) is used. It was introduced by Italian researchers in a scientific research [paper](https://pubmed.ncbi.nlm.nih.gov/32406829/) in 2020. It contains a total of 277 lung ultrasound (LUS) videos from 35 patients, corresponding to 58,924 frames. Among them, 45,560 frames were acquired with the convex probe and 13,364 frames with the linear probe. All frames were labelled with four-level scoring system (score-0, score-1, score-2 and score-3). This scoring system classifies LUS frames by the severity of the pathology.
+
+<div align="center">
+  <img src="doc-imgs/lus_scores.jpg" alt="Logo" width="" height="400">
+</div>
 
 For more information about the dataset please contact Dr. Libertario Demi - libertario.demi@unitn.it
 
@@ -101,6 +102,7 @@ Use this space to list resources you find helpful and would like to give credit 
 * [EfficientNet](https://debuggercafe.com/transfer-learning-using-efficientnet-pytorch/)
 * [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html)
 * [Docker](https://docs.docker.com/get-started/)
+* [Ref dataset image](https://theultrasoundjournal.springeropen.com/articles/10.1186/s13089-022-00264-8)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
